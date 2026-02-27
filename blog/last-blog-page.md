@@ -125,7 +125,7 @@ The workflow would pull code, but then I'd have merge conflicts locally. Solutio
 # Always pull before pushing
 git pull --rebase origin main
 git push origin main
-```
+```bash
 
 ### Problem 3: Wrong Repository Path
 ```bash
