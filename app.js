@@ -1,15 +1,122 @@
-const port = 9090; // We'll run the server on port 8080
+const port = 9090; // running the server on port 8080
 
 // IMPORTS
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+const {getBlogList, convertMarkdown} = require("./modules/markdown-helpers");
+const pathToBlogFolder = __dirname + '/blog/';
 
 // MIDDLEWARE
 app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+// allow the app to get data for form submits
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// redirect to HTTPS on live server
+app.use((req, res, next) => {
+   if (process.env.NODE_ENV === 'production') {
+      if (req.headers['x-forwarded-proto'] !== 'https')
+         return res.redirect('https://' + req.headers.host + req.url);
+      else
+         return next();
+   }else{
+      return next();
+   }
+});
 
 // ROUTES
+
+// Home page
 app.get('/', (req, res) => {
-   res.send('<h1>Hello World from Express!</h1>');
+  res.render('home', {
+     title: "My Home Page"
+  });
+});
+
+// Blog list page
+app.get('/blog', (req, res) => {
+  const blogList = getBlogList(pathToBlogFolder);
+  res.render('blog-list', {
+    title: "Blog",
+    posts: blogList
+  });
+});
+
+// Individual blog post
+app.get("/blog/:post", (req, res) => {
+  try{
+    const pathToFile = pathToBlogFolder + req.params.post + ".md";
+    console.log("Markdown file: " + pathToFile);
+    const obj = convertMarkdown(pathToFile);
+    res.render('blog-post', {
+       title: obj.data.title,
+       description: obj.data.description,
+       author: obj.data.author,
+       published: obj.data.published,
+       content: obj.html
+    });
+  }catch(error){
+    console.log(error);
+    res.status(404).redirect("/404");
+  }
+});
+
+// Contact page
+app.get('/contact', (req, res) => {
+  res.render('contact', {
+     title: "Contact Me"
+  });
+});
+
+// Contact form submission
+app.post('/contact/submit', (req, res) => {
+
+  // import the helper functions that we need
+  const {isValidContactFormSubmit, sendEmailNotification} = require("./modules/contact-helpers");
+
+  // make the req.body object into variables
+  const {firstName, lastName, email, comments} = req.body;
+
+  // Validate the variables
+  if(isValidContactFormSubmit(firstName, lastName, email, comments)){
+    // everything is valid, so send an email to YOUR email address with the data entered into the form
+    const message = `From: ${firstName} ${lastName}\n
+                    Email: ${email}\n
+                    Message: ${comments}`;
+
+    sendEmailNotification(message, (err, info) => {
+      if(err){
+        console.log(err);
+        res.status(500).send("There was an error sending the email");
+      }else{
+        // email sent successfully, so show a confirmation page
+        res.render("default-layout", {
+          title: "Contact Confirmation",
+          content: "<h2>Thank you for contacting me!</h2><p>I'll get back to you ASAP.</p>"
+        })
+      }
+    })
+
+  }else{
+    res.status(400).send("Invalid request - data is not valid")
+  }
+
+});
+
+// 404 page
+app.get("/404", (req, res) => {
+  res.status(404);
+  res.render('default-layout', {
+     title: "Page Not Found",
+     content: "<h1>Sorry!</h1><h3>We can't find the page you're requesting.</h3>"
+  });
+});
+
+// Wildcard route (must be last)
+app.all('*', (req, res) => {
+  res.status(404).redirect("/404");
 });
 
 // START THE SERVER

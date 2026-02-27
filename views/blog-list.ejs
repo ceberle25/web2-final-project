@@ -1,0 +1,14 @@
+<%- include('partials/top') %>
+<main>
+  <h1>Blog Posts</h1>
+  <ul>
+  <% for (let i = 0; i < posts.length; i++) { %>
+      <li>
+         <a href="<%=posts[i].link%>"><%=posts[i].title%></a>
+         <p><%=posts[i].description%></p>
+         <p><strong>Author:</strong> <%=posts[i].author%> | <strong>Published:</strong> <%=posts[i].published%></p>
+      </li>
+  <% } %>
+  </ul>
+</main>
+<%- include('partials/bottom') %>

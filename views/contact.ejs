@@ -1,0 +1,28 @@
+<%- include('partials/top') %>
+<main role="main">
+  <h1>Contact Me</h1>
+  <p>Have a question or want to get in touch? Fill out the form below and I'll get back to you as soon as possible.</p>
+  
+  <form id="contactForm" method="POST" action="/contact/submit">
+
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" name="firstName" aria-required="true" aria-describedby="vFirstName">
+      <span id="vFirstName" class="validation" style="color:red"></span>
+
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" name="lastName" aria-required="true" aria-describedby="vLastName">
+      <span id="vLastName" class="validation" style="color:red"></span>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" aria-required="true" aria-describedby="vEmail">
+      <span id="vEmail" class="validation" style="color:red"></span>
+
+      <label for="comments">Comments:</label>
+      <textarea id="comments" name="comments" aria-required="true" aria-describedby="vComments"></textarea>
+      <span id="vComments" class="validation" style="color:red"></span>
+
+      <button type="submit">Send Message</button>
+
+  </form>
+</main>
+<%- include('partials/bottom') %>
